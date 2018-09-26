@@ -4,6 +4,7 @@ const pathLib = require("path"),
   splice = Array.prototype.splice,
   indexof = Array.prototype.indexOf,
   isObject = isType("Object"),
+  isArray = isType("Array"),
   fs = require("fs");
 function isType(type){
   return function(obj){
@@ -21,8 +22,10 @@ function extend(a, b){
   }
 }
 function each(arr, callback){
-  for(let i = 0; i < arr.length; i++){
-    callback(arr[i], i);
+  if(isArray(arr)){
+    for(let i = 0; i < arr.length; i++){
+      callback(arr[i], i);
+    }
   }
 }
 function getParentDir(path){
@@ -47,6 +50,17 @@ class Node {
       parentNode.children = parentNode.children || [];
       parentNode.children.push(this);
     }
+  }
+  allChildren(){
+    var rs = [];
+    function recursive(node){
+      rs.push(node);
+      each(node.children, (n, i)=>{
+        recursive(n);
+      })
+    }
+    recursive(this);
+    return rs;
   }
   write(name, content, callback){
     let p = pathLib.join(this.path, name),
