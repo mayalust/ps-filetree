@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 const pathLib = require("path"),
   tostring = Object.prototype.toString,
   push = Array.prototype.push,
