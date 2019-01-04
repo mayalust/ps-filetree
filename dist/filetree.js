@@ -67,7 +67,9 @@ class Node {
       node = this.root.map[p];
     fs.writeFile(pathLib.join(this.abspath, name), content, (err, d) => {
       if(err) {} else {}
-      let nd = node || this.root.addNode(pathLib.join(this.path, name), "file", this);
+      let nd = node || this.root.addNode({
+        path : pathLib.join(this.path, name), type : "file"
+      }, "file", this);
       callback && callback.call(this, {
         code : 0,
         data : nd
@@ -101,7 +103,9 @@ class Node {
         if(err){
           callback && callback.call(this, err);
         } else {
-          let nd = node || this.root.addNode(pathLib.join(this.path, name), "directory", this);
+          let nd = node || this.root.addNode({
+            path : pathLib.join(this.path, name), type : "directory"
+          }, this);
           callback && callback.call(this, {
             code : 0,
             data : nd
@@ -132,7 +136,7 @@ class FileTree {
     this.nodelist = [];
     this.length = 0;
     this.rootpath = rootpath;
-    this.rootNode = this.addNode("", null);
+    this.rootNode = this.addNode({ path : "", type : null});
     function recursion(parentNode, childpath){
       return new Promise((resolve, reject) => {
         fs.readdir(pathLib.join(rootpath, childpath), (err, d) => {
@@ -149,6 +153,7 @@ class FileTree {
                     } else if(d.isFile()){
                       rs.type = "file";
                     }
+                    rs.modifytime = d.mtime;
                     resolve(rs);
                   } else {
                     reject(err)
@@ -159,7 +164,7 @@ class FileTree {
             Promise.all(promises).then((filesAndDirctorys) => {
               let directorys = [], nd, item;
               while(nd = filesAndDirctorys.shift()){
-                item =this.addNode(nd.path, nd.type, parentNode);
+                item =this.addNode(nd, parentNode);
                 if(nd.type === "directory")
                   directorys.push(bind(recursion, this)(item, pathLib.join(item.path)));
               };
@@ -182,8 +187,9 @@ class FileTree {
       this.events['error'] && this.events['error'].call(this, e);
     })
   }
-  addNode(path, type, parentNode){
-    let item = new Node(parentNode || this),
+  addNode(nd, parentNode){
+    let { type, path, modifytime } = nd,
+      item = new Node(parentNode || this),
       dir = pathLib.join(this.rootpath, path),
       basename = pathLib.basename(dir),
       nameExp = /([\w-@$#%()]+)(?:\.[\w]+)?/g,
@@ -196,7 +202,8 @@ class FileTree {
       basename : basename,
       name : name ? name[1] : null,
       root : this,
-      parent : parentNode || this
+      parent : parentNode || this,
+      modifytime : modifytime
     });
     this.type = type;
     this.map[item.path] = item;

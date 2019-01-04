@@ -1,6 +1,6 @@
 {
   "name": "ps-filetree",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "",
   "main": "./dist/filetree.js",
   "scripts": {
