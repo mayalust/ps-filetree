@@ -133,6 +133,7 @@ class Node {
 class FileTree {
   constructor(rootpath){
     this.map = {};
+    this.events = {};
     this.nodelist = [];
     this.length = 0;
     this.rootpath = rootpath;
@@ -225,7 +226,6 @@ class FileTree {
     delete this.map[p];
   }
   on(eventname, callback){
-    this.events = this.events || {};
     this.events[eventname] = callback;
   }
   getPath(path){
